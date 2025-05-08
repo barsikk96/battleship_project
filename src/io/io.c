@@ -16,17 +16,15 @@ void draw_border(int starty,
     mvaddch(starty + height - 1, startx + width - 1, ACS_LRCORNER);
 }
 
-void draw_field(int  starty, 
-		int  startx, 
-		Cell field[FIELD_SIZE][FIELD_SIZE], 
-		int  show_ships, 
-		int  cursor_y, 
-		int  cursor_x, 
-		int  active) {
+void draw_field(int  	starty, 
+		int  	startx, 
+		Cell 	field[FIELD_SIZE][FIELD_SIZE], 
+		int  	show_ships, 
+		Cursor* cursor) {
     for (int y = 0; y < FIELD_SIZE; y++) {
         for (int x = 0; x < FIELD_SIZE; x++) {
             char ch = '~'; // по умолчанию вода
-            switch (field[y][x].status) {
+            switch (field[cursor->y][cursor->x].status) {
                 case WATER: ch = '~'; break;
                 case SHIP:  ch = show_ships ? '#' : '~'; break;
                 case HIT:   ch = '*'; break;
@@ -34,7 +32,7 @@ void draw_field(int  starty,
                 case MISS:  ch = '^'; break;
             }
 
-            if (cursor_y == y && cursor_x == x && active) {
+            if (cursor->y == y && cursor->x == x && cursor->on_field) {
                 attron(A_REVERSE);
                 mvprintw(starty + y, startx + x * CELL_WIDTH, "%c ", ch);
                 attroff(A_REVERSE);
@@ -45,10 +43,50 @@ void draw_field(int  starty,
     }
 }
 
-void draw_buttons( 	int   starty, 
-	    	  const char* mode) {
-    mvprintw(starty, 2, "[Режим: %s]", mode);
+void draw_buttons(int  starty, 
+	    	  char mode) {
+    char* mode_name; 
+    if(mode == PLACEMENT_MODE)
+	mode_name = "Расстановка кораблей";
+    if(mode == BATTLE_MODE)
+	mode_name = "Сражение";
+
+    mvprintw(starty, 2, "[Режим: %s]", mode_name);
     mvprintw(starty + 1, 2, "Стрелки — перемещение");
     mvprintw(starty + 2, 2, "Enter — действие / установка");
     mvprintw(starty + 3, 2, "Ctrl+C — выход");
+}
+
+void mv_up_cursor(Cursor* cursor) {
+    if(cursor->y > 0)
+	(cursor->y)--;
+}
+
+void mv_down_cursor(Cursor* cursor) {
+    if(cursor->y < FIELD_SIZE - 1)
+	(cursor->y)++;
+}
+
+void mv_left_cursor(Cursor* cursor) {
+    if(cursor->x > 0)
+	(cursor->x)--;
+}
+
+void mv_right_cursor(Cursor* cursor) {
+    if(cursor->x < FIELD_SIZE - 1)
+	(cursor->x)++;
+}
+
+void mv_field_cursor(Cursor* cursor) {
+    if(cursor->on_field)
+	(cursor->on_field) = ENEMY_FIELD;
+    else
+	(cursor->on_field) = PLAYER_FIELD;
+}
+
+void choose_ship_dir(Cursor* cursor) {
+    if(cursor->direction == VERT)
+	cursor->direction = HOR;
+    else
+	cursor->direction = VERT;
 }

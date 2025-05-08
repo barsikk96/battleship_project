@@ -16,23 +16,30 @@ typedef struct {
     	     char status;
 } Cell;
 
-void init_field(Cell field[10][10]);
+typedef struct {
+    Cell (*p1_field)[FIELD_SIZE];
+    Cell (*p2_field)[FIELD_SIZE];
+    char  game_mode;
+    char  game_screen;
+} Game;
 
-int place_ship(Cell  field[10][10],
-	       Ship* ship, 
-	       Cell* def_cell,
-	       int   direction);
+void init_field(Cell field[FIELD_SIZE][FIELD_SIZE]);
 
-int is_free_space(Cell  field[10][10],
+void place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
+	        Ship* ship, 
+	        Cell* def_cell,
+	        int   direction);
+
+int is_free_space(Cell  field[FIELD_SIZE][FIELD_SIZE],
 		  Ship* def_ship,
 		  Cell* def_cell,
 		  int   direction);
 
-int filling_cells_vert(Cell  field[10][10],
+int filling_cells_vert(Cell  field[FIELD_SIZE][FIELD_SIZE],
 		       Ship* def_ship,
 		       Cell* def_cell);
 
-int filling_cells_hor(Cell  field[10][10],
+int filling_cells_hor(Cell  field[FIELD_SIZE][FIELD_SIZE],
 		      Ship* def_ship,
 		      Cell* def_cell);
 

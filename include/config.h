@@ -16,6 +16,12 @@
 #define SHOW_SHIPS 1
 #define HIDE_SHIPS 0
 
+#define PLACEMENT_MODE 1
+#define BATTLE_MODE 2
+
+#define PLAYER1_SCREEN 1
+#define PLAYER2_SCREEN 2
+
 #define VERT 1
 #define HOR 2
 

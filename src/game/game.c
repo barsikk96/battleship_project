@@ -13,10 +13,10 @@ void init_field(Cell field[FIELD_SIZE][FIELD_SIZE]) {
 	}
 }
 
-int place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
-	       Ship* ship, 
-	       Cell* def_cell,
-	       int   direction) {
+void place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
+	        Ship* ship, 
+	        Cell* def_cell,
+	        int   direction) {
     int flag_error = SUCCESS;
     
     switch(direction) {
@@ -35,8 +35,6 @@ int place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
 	default:
 	    break;
     }
-
-    return flag_error;
 }
 
 int is_free_space(Cell  field[FIELD_SIZE][FIELD_SIZE],

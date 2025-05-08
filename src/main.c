@@ -20,34 +20,26 @@ int main() {
     int field_box_height = FIELD_SIZE + 2;
     int field_box_width  = FIELD_SIZE * CELL_WIDTH * 2 + 6; // 2 поля + пробел
 
-    Cell player1_field[10][10];
+    Cell player1_field[FIELD_SIZE][FIELD_SIZE];
     init_field(player1_field);
 
-    Cell player2_field[10][10];
+    Cell player2_field[FIELD_SIZE][FIELD_SIZE];
     init_field(player2_field);
 
-    // Курсоры
-    int cursor_y = 9, 
-	cursor_x = 0;
-    int on_field = PLAYER_FIELD;
+    Game settings = { player1_field,
+    		      player2_field,
+    		      PLACEMENT_MODE,
+    		      PLAYER1_SCREEN };
 
-    char* current_mode = "Установка кораблей";
+    Cursor cursor = { 0, 9, PLAYER_FIELD, VERT };
 
     Ship* cruiser1   = malloc(sizeof(Ship));
     cruiser1->length = 4;
     cruiser1->hp     = 4;
-    place_ship(player1_field,
-	       cruiser1,
-	       &player1_field[9][6],
-	       HOR);
 
     Ship* cruiser2   = malloc(sizeof(Ship));
     cruiser2->length = 4;
     cruiser2->hp     = 4;
-    place_ship(player2_field,
-	       cruiser2,
-	       &player2_field[9][6],
-	       HOR);
 
     while (1) {
         clear();
@@ -61,32 +53,28 @@ int main() {
         // Нарисовать поля
         draw_field(field_box_y + 1, 
 		   field_box_x + 2, 
-		   player1_field, 
+		   settings.p1_field, 
 		   SHOW_SHIPS, 
-		   cursor_y, 
-		   cursor_x, 
-		   on_field);
+		   &cursor);
         
 	draw_field(field_box_y + 1, 
 		   field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
-		   player2_field, 
+		   settings.p2_field, 
 		   HIDE_SHIPS, 
-		   cursor_y, 
-		   cursor_x, 
-		   !on_field);
+		   &cursor);
 
         // Кнопки
         draw_buttons(field_box_y + field_box_height + 1, 
-		     current_mode);
+		     settings.game_mode);
 
         refresh();
 
         // Управление
-        int ch = getch();
-        handle_cases(ch,
-		     &cursor_x,
-		     &cursor_y,
-		     &on_field); 
+        int key = getch();
+        handle_cases(key,
+		     &cursor,
+		     cruiser1,
+		     &settings); 
     }
 
     free(cruiser1);
