@@ -50,18 +50,40 @@ int main() {
 		    field_box_height, 
 		    field_box_width);
 
-        // Нарисовать поля
-        draw_field(field_box_y + 1, 
-		   field_box_x + 2, 
-		   settings.p1_field, 
-		   SHOW_SHIPS, 
-		   &cursor);
-        
-	draw_field(field_box_y + 1, 
-		   field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
-		   settings.p2_field, 
-		   HIDE_SHIPS, 
-		   &cursor);
+	// Поля для первого игрока
+        if(settings.game_screen == PLAYER1_SCREEN) {
+            draw_field(field_box_y + 1, 
+            	       field_box_x + 2, 
+            	       settings.p1_field,
+		       SHOW_SHIPS, 
+            	       &cursor,
+		       PLAYER_FIELD);
+                
+            draw_field(field_box_y + 1, 
+            	       field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
+            	       settings.p2_field, 
+		       HIDE_SHIPS, 
+            	       &cursor,
+		       ENEMY_FIELD);
+	}
+
+	// Поля для второго игрока
+        if(settings.game_screen == PLAYER2_SCREEN) {
+            draw_field(field_box_y + 1, 
+            	       field_box_x + 2, 
+            	       settings.p2_field,
+		       SHOW_SHIPS, 
+            	       &cursor,
+		       PLAYER_FIELD);
+                
+            draw_field(field_box_y + 1, 
+            	       field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
+            	       settings.p1_field, 
+		       HIDE_SHIPS, 
+            	       &cursor,
+		       ENEMY_FIELD);
+	}
+	
 
         // Кнопки
         draw_buttons(field_box_y + field_box_height + 1, 

@@ -19,8 +19,9 @@ void draw_border(int starty,
 void draw_field(int  	starty, 
 		int  	startx,  
 		Cell 	field[FIELD_SIZE][FIELD_SIZE], 
-		int  	show_ships, 
-		Cursor* cursor);
+		int  	is_own_field, 
+		Cursor* cursor,
+		int     current_field);
 
 void draw_buttons(int  starty, 
 		  char mode);

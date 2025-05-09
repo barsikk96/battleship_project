@@ -19,17 +19,20 @@ void handle_cases(int     key,
 		  Game*   settings) {
     char break_flag = 0;
     int  bindings_size = sizeof(bindings) / sizeof(bindings[0]); 
+    
+    if(key == KEY_ENTER || key == '\n') {
+	enter_handler(settings,
+		      ship, /*ship надо передать в составе структуры*/
+		      cursor);
+	break_flag = 1;
+    }
     for(int h_case = 0;
 	    h_case < bindings_size && !break_flag;
             h_case++)
-	if(bindings[h_case].key == key) {
+	if(bindings[h_case].mode == settings->game_mode && 
+	   bindings[h_case].key  == key) {
 	    bindings[h_case].handler(cursor);
 	    break_flag = 1;
-	} else {
-	    if(key == KEY_ENTER)
-		enter_handler(settings,
-			      ship, /*ship надо передать в составе структуры*/
-			      cursor);
 	}
 }
 
@@ -46,7 +49,7 @@ void enter_handler(Game*   settings,
 	case PLACEMENT_MODE:
 	    place_ship(field,
 		       ship/*ship*/,
-		       &field[cursor->x][cursor->y],
+		       &field[cursor->y][cursor->x],
 		       cursor->direction);
 	    break;
 	case BATTLE_MODE:

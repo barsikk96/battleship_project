@@ -19,20 +19,23 @@ void draw_border(int starty,
 void draw_field(int  	starty, 
 		int  	startx, 
 		Cell 	field[FIELD_SIZE][FIELD_SIZE], 
-		int  	show_ships, 
-		Cursor* cursor) {
+		int  	is_own_field, 
+		Cursor* cursor,
+		int	current_field) {
     for (int y = 0; y < FIELD_SIZE; y++) {
         for (int x = 0; x < FIELD_SIZE; x++) {
             char ch = '~'; // по умолчанию вода
-            switch (field[cursor->y][cursor->x].status) {
+            switch (field[y][x].status) {
                 case WATER: ch = '~'; break;
-                case SHIP:  ch = show_ships ? '#' : '~'; break;
+                case SHIP:  ch = is_own_field ? '#' : '~'; break;
                 case HIT:   ch = '*'; break;
                 case KILL:  ch = 'x'; break;
                 case MISS:  ch = '^'; break;
             }
 
-            if (cursor->y == y && cursor->x == x && cursor->on_field) {
+            if (cursor->y == y && 
+		cursor->x == x && 
+		cursor->on_field == current_field) {
                 attron(A_REVERSE);
                 mvprintw(starty + y, startx + x * CELL_WIDTH, "%c ", ch);
                 attroff(A_REVERSE);
@@ -78,15 +81,13 @@ void mv_right_cursor(Cursor* cursor) {
 }
 
 void mv_field_cursor(Cursor* cursor) {
-    if(cursor->on_field)
-	(cursor->on_field) = ENEMY_FIELD;
-    else
-	(cursor->on_field) = PLAYER_FIELD;
+    cursor->on_field = (cursor->on_field == PLAYER_FIELD) 
+	    				  ? 
+	    		      ENEMY_FIELD : PLAYER_FIELD;
 }
 
 void choose_ship_dir(Cursor* cursor) {
-    if(cursor->direction == VERT)
-	cursor->direction = HOR;
-    else
-	cursor->direction = VERT;
+    cursor->direction = (cursor->direction == VERT) 
+	      				    ?
+	    				HOR : VERT;
 }

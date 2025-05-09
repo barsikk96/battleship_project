@@ -1,0 +1,552 @@
+./game/game.c:
+#include "game.h"
+
+void init_field(Cell field[FIELD_SIZE][FIELD_SIZE]) {
+    for(unsigned char init_row = 0; init_row < 10; init_row++)
+	for(unsigned char init_col = 0; 
+			  init_col < 10; 
+			  init_col++) {
+	    field[init_row][init_col].row     = init_row;
+	    field[init_row][init_col].col     = init_col;
+	    field[init_row][init_col].checked = 0;
+	    field[init_row][init_col].ship    = NULL;
+	    field[init_row][init_col].status  = WATER;
+	}
+}
+
+void place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
+	        Ship* ship, 
+	        Cell* def_cell,
+	        int   direction) {
+    int flag_error = SUCCESS;
+    
+    switch(direction) {
+	case VERT:
+	    flag_error = filling_cells_vert(field, 
+			    	 	    ship, 
+					    def_cell);
+	    log_err(flag_error);
+	    break;
+	case HOR:
+	    flag_error = filling_cells_hor(field, 
+			      		   ship, 
+			      	 	   def_cell);
+	    log_err(flag_error);
+	    break;
+	default:
+	    break;
+    }
+}
+
+int is_free_space(Cell  field[FIELD_SIZE][FIELD_SIZE],
+		  Ship* def_ship,
+		  Cell* def_cell,
+		  int   direction) {
+    int flag_error = SUCCESS;
+
+    unsigned char count_len = def_ship->length;
+    
+    if(direction == VERT) {
+    	if(count_len <= 
+           def_cell->row + 1) {
+	    for(int row = def_cell->row; 
+		count_len > 0;
+		row--) {
+	        if(field[row][def_cell->col].ship)
+	    	    flag_error = ERR_OCC_CELL;
+	    	
+		count_len--;
+	    }
+	} else
+	    flag_error = ERR_NO_SPACE;
+    }
+    if(direction == HOR) {
+	if(count_len <= 
+       	   10 - def_cell->col) {
+	    for(int col = def_cell->col; 
+		count_len > 0;
+		col++) {
+	    	if(field[def_cell->row][col].ship)
+	    	    flag_error = ERR_OCC_CELL;
+		
+		count_len--;
+	    }
+	} else
+	    flag_error = ERR_NO_SPACE;
+    }
+
+    return flag_error;
+}
+
+int filling_cells_vert(Cell  field[FIELD_SIZE][FIELD_SIZE],
+		       Ship* def_ship,
+		       Cell* def_cell) {
+    int flag_error = SUCCESS;
+
+    
+    unsigned char count_len = def_ship->length;
+    
+    flag_error = is_free_space(field,
+		      	       def_ship,
+		      	       def_cell,
+		      	       VERT);
+    for(int row = def_cell->row; 
+	    count_len > 0 && !flag_error; 
+            row--) {
+	field[row][def_cell->col].ship   = def_ship;
+	field[row][def_cell->col].status = SHIP; 
+	count_len--;
+    } 
+
+    return flag_error;
+}
+
+int filling_cells_hor(Cell  field[FIELD_SIZE][FIELD_SIZE],
+		      Ship* def_ship,
+		      Cell* def_cell) {
+    int flag_error = SUCCESS;
+
+    unsigned char count_len = def_ship->length;
+    
+    flag_error = is_free_space(field,
+		      	       def_ship,
+		      	       def_cell,
+		      	       HOR);
+    for(int col = def_cell->col; 
+	    count_len > 0 && !flag_error;
+	    col++) {
+	field[def_cell->row][col].ship   = def_ship;
+	field[def_cell->row][col].status = SHIP;
+	count_len--;
+    } 
+
+    return flag_error;
+}
+
+void log_err(int flag_error) {
+    FILE* log_file = fopen("../log_file.txt", "a");
+    
+    
+    time_t current_time = time(NULL);
+    struct tm *time_info;
+    char   time_str[100];
+    time_info = localtime(&current_time);
+    strftime(time_str, 
+	     sizeof(time_str), 
+	     "%Y-%m-%d %H:%M:%S", time_info);
+
+    if(!log_file) {
+	flag_error = ERR_ALLOCATION;
+    	printf("Ошибка открытия файла! - %s\n", time_str);
+    } else {
+    	switch(flag_error) {
+	    case ERR_ALLOCATION:
+	    	fprintf(log_file, 
+		        "Ошибка выделения памяти! - %s\n",  time_str);
+	    	break;
+	    case ERR_NO_SPACE:
+	    	fprintf(log_file, 
+		        "Выход за пределы массива! - %s\n", time_str);
+	    	break;
+	    case ERR_OCC_CELL:
+	    	fprintf(log_file, 
+		        "Клетка занята! - %s\n", 	    time_str);
+	    	break;
+	    default:
+	    	break;
+    	}
+    }
+
+    fclose(log_file);
+}
+
+./game/game.h:
+#ifndef GAME_H
+#define GAME_H
+
+#include "../include/config.h"
+
+typedef struct {
+    unsigned char length;
+    unsigned char hp;
+} Ship;
+
+typedef struct {
+    Ship* 	  ship;
+    unsigned char row;
+    unsigned char col;
+    unsigned char checked;
+    	     char status;
+} Cell;
+
+typedef struct {
+    Cell (*p1_field)[FIELD_SIZE];
+    Cell (*p2_field)[FIELD_SIZE];
+    char  game_mode;
+    char  game_screen;
+} Game;
+
+void init_field(Cell field[FIELD_SIZE][FIELD_SIZE]);
+
+void place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
+	        Ship* ship, 
+	        Cell* def_cell,
+	        int   direction);
+
+int is_free_space(Cell  field[FIELD_SIZE][FIELD_SIZE],
+		  Ship* def_ship,
+		  Cell* def_cell,
+		  int   direction);
+
+int filling_cells_vert(Cell  field[FIELD_SIZE][FIELD_SIZE],
+		       Ship* def_ship,
+		       Cell* def_cell);
+
+int filling_cells_hor(Cell  field[FIELD_SIZE][FIELD_SIZE],
+		      Ship* def_ship,
+		      Cell* def_cell);
+
+void log_err(int flag_error);
+
+#endif
+
+./io/io.h:
+#ifndef IO_F
+#define IO_F
+
+#include "../../include/config.h"
+#include "../game/game.h"
+
+typedef struct {
+    int x;
+    int y;
+    int on_field;
+    int direction;
+} Cursor;
+
+void draw_border(int starty, 
+		 int startx, 
+		 int height, 
+		 int width);
+
+void draw_field(int  	starty, 
+		int  	startx,  
+		Cell 	field[FIELD_SIZE][FIELD_SIZE], 
+		int  	is_own_field, 
+		Cursor* cursor,
+		int     current_field);
+
+void draw_buttons(int  starty, 
+		  char mode);
+
+void mv_up_cursor(Cursor* cursor);
+
+void mv_down_cursor(Cursor* cursor);
+
+void mv_left_cursor(Cursor* cursor);
+
+void mv_right_cursor(Cursor* cursor);
+
+void mv_field_cursor(Cursor* cursor);
+
+void choose_ship_dir(Cursor* cursor);
+
+#endif
+
+./io/io.c:
+#include "io.h"
+
+void draw_border(int starty, 
+		 int startx, 
+		 int height, 
+		 int width) {
+    mvaddch(starty, startx,             ACS_ULCORNER);
+    mvhline(starty, startx + 1,         ACS_HLINE, width - 2);
+    mvaddch(starty, startx + width - 1, ACS_URCORNER);
+
+    mvvline(starty + 1, startx,             ACS_VLINE, height - 2);
+    mvvline(starty + 1, startx + width - 1, ACS_VLINE, height - 2);
+
+    mvaddch(starty + height - 1, startx,             ACS_LLCORNER);
+    mvhline(starty + height - 1, startx + 1,         ACS_HLINE, width - 2);
+    mvaddch(starty + height - 1, startx + width - 1, ACS_LRCORNER);
+}
+
+void draw_field(int  	starty, 
+		int  	startx, 
+		Cell 	field[FIELD_SIZE][FIELD_SIZE], 
+		int  	is_own_field, 
+		Cursor* cursor,
+		int	current_field) {
+    for (int y = 0; y < FIELD_SIZE; y++) {
+        for (int x = 0; x < FIELD_SIZE; x++) {
+            char ch = '~'; // по умолчанию вода
+            switch (field[y][x].status) {
+                case WATER: ch = '~'; break;
+                case SHIP:  ch = is_own_field ? '#' : '~'; break;
+                case HIT:   ch = '*'; break;
+                case KILL:  ch = 'x'; break;
+                case MISS:  ch = '^'; break;
+            }
+
+            if (cursor->y == y && 
+		cursor->x == x && 
+		cursor->on_field == current_field) {
+                attron(A_REVERSE);
+                mvprintw(starty + y, startx + x * CELL_WIDTH, "%c ", ch);
+                attroff(A_REVERSE);
+            } else {
+                mvprintw(starty + y, startx + x * CELL_WIDTH, "%c ", ch);
+            }
+        }
+    }
+}
+
+void draw_buttons(int  starty, 
+	    	  char mode) {
+    char* mode_name; 
+    if(mode == PLACEMENT_MODE)
+	mode_name = "Расстановка кораблей";
+    if(mode == BATTLE_MODE)
+	mode_name = "Сражение";
+
+    mvprintw(starty, 2, "[Режим: %s]", mode_name);
+    mvprintw(starty + 1, 2, "Стрелки — перемещение");
+    mvprintw(starty + 2, 2, "Enter — действие / установка");
+    mvprintw(starty + 3, 2, "Ctrl+C — выход");
+}
+
+void mv_up_cursor(Cursor* cursor) {
+    if(cursor->y > 0)
+	(cursor->y)--;
+}
+
+void mv_down_cursor(Cursor* cursor) {
+    if(cursor->y < FIELD_SIZE - 1)
+	(cursor->y)++;
+}
+
+void mv_left_cursor(Cursor* cursor) {
+    if(cursor->x > 0)
+	(cursor->x)--;
+}
+
+void mv_right_cursor(Cursor* cursor) {
+    if(cursor->x < FIELD_SIZE - 1)
+	(cursor->x)++;
+}
+
+void mv_field_cursor(Cursor* cursor) {
+    cursor->on_field = (cursor->on_field == PLAYER_FIELD) 
+	    				  ? 
+	    		      ENEMY_FIELD : PLAYER_FIELD;
+}
+
+void choose_ship_dir(Cursor* cursor) {
+    cursor->direction = (cursor->direction == VERT) 
+	      				    ?
+	    				HOR : VERT;
+}
+
+./main.c:
+#include "io.h"
+#include "game.h"
+#include "handler.h"
+
+int main() {
+    setlocale(LC_ALL, "");
+    initscr();
+    noecho();
+    curs_set(FALSE);
+    keypad(stdscr, TRUE);
+    cbreak();
+
+    int screen_height, 
+	screen_width;
+    getmaxyx(stdscr, screen_height, screen_width);
+
+    // Позиции и размеры
+    int field_box_y = 1, 
+	field_box_x = 2;
+    int field_box_height = FIELD_SIZE + 2;
+    int field_box_width  = FIELD_SIZE * CELL_WIDTH * 2 + 6; // 2 поля + пробел
+
+    Cell player1_field[FIELD_SIZE][FIELD_SIZE];
+    init_field(player1_field);
+
+    Cell player2_field[FIELD_SIZE][FIELD_SIZE];
+    init_field(player2_field);
+
+    Game settings = { player1_field,
+    		      player2_field,
+    		      PLACEMENT_MODE,
+    		      PLAYER1_SCREEN };
+
+    Cursor cursor = { 0, 9, PLAYER_FIELD, VERT };
+
+    Ship* cruiser1   = malloc(sizeof(Ship));
+    cruiser1->length = 4;
+    cruiser1->hp     = 4;
+
+    Ship* cruiser2   = malloc(sizeof(Ship));
+    cruiser2->length = 4;
+    cruiser2->hp     = 4;
+
+    while (1) {
+        clear();
+
+        // Нарисовать рамку
+        draw_border(field_box_y, 
+		    field_box_x, 
+		    field_box_height, 
+		    field_box_width);
+
+	// Поля для первого игрока
+        if(settings.game_screen == PLAYER1_SCREEN) {
+            draw_field(field_box_y + 1, 
+            	       field_box_x + 2, 
+            	       settings.p1_field,
+		       SHOW_SHIPS, 
+            	       &cursor,
+		       PLAYER_FIELD);
+                
+            draw_field(field_box_y + 1, 
+            	       field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
+            	       settings.p2_field, 
+		       HIDE_SHIPS, 
+            	       &cursor,
+		       ENEMY_FIELD);
+	}
+
+	// Поля для второго игрока
+        if(settings.game_screen == PLAYER2_SCREEN) {
+            draw_field(field_box_y + 1, 
+            	       field_box_x + 2, 
+            	       settings.p2_field,
+		       SHOW_SHIPS, 
+            	       &cursor,
+		       PLAYER_FIELD);
+                
+            draw_field(field_box_y + 1, 
+            	       field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
+            	       settings.p1_field, 
+		       HIDE_SHIPS, 
+            	       &cursor,
+		       ENEMY_FIELD);
+	}
+	
+
+        // Кнопки
+        draw_buttons(field_box_y + field_box_height + 1, 
+		     settings.game_mode);
+
+        refresh();
+
+        // Управление
+        int key = getch();
+        handle_cases(key,
+		     &cursor,
+		     cruiser1,
+		     &settings); 
+    }
+
+    free(cruiser1);
+    free(cruiser2);
+
+    endwin();
+
+    return 0;
+}
+
+./handler/handler.c:
+#include "handler.h"
+
+KeyBinding bindings[] = {
+    {PLACEMENT_MODE, KEY_UP,    mv_up_cursor},
+    {PLACEMENT_MODE, KEY_DOWN,  mv_down_cursor},
+    {PLACEMENT_MODE, KEY_LEFT,  mv_left_cursor},
+    {PLACEMENT_MODE, KEY_RIGHT, mv_right_cursor},
+    {PLACEMENT_MODE, '\t',      choose_ship_dir},
+    {BATTLE_MODE,    KEY_UP,    mv_up_cursor},
+    {BATTLE_MODE,    KEY_DOWN,  mv_down_cursor},
+    {BATTLE_MODE,    KEY_LEFT,  mv_left_cursor},
+    {BATTLE_MODE,    KEY_RIGHT, mv_right_cursor},
+    {BATTLE_MODE,    '\t',      mv_field_cursor}
+};
+
+void handle_cases(int     key,
+		  Cursor* cursor,
+		  Ship*   ship, // временное решение
+		  Game*   settings) {
+    char break_flag = 0;
+    int  bindings_size = sizeof(bindings) / sizeof(bindings[0]); 
+    
+    if(key == KEY_ENTER) {
+	enter_handler(settings,
+		      ship, /*ship надо передать в составе структуры*/
+		      cursor);
+	break_flag = 1;
+    }
+    for(int h_case = 0;
+	    h_case < bindings_size && !break_flag;
+            h_case++)
+	if(bindings[h_case].mode == settings->game_mode && 
+	   bindings[h_case].key  == key) {
+	    bindings[h_case].handler(cursor);
+	    break_flag = 1;
+	}
+}
+
+void enter_handler(Game*   settings,
+		   Ship*   ship, /*ship в составе структуры надо сделать*/
+		   Cursor* cursor) {
+    Cell (*field)[FIELD_SIZE];
+    if(settings->game_screen == PLAYER1_SCREEN)
+	field = settings->p1_field;
+    else
+	field = settings->p2_field;
+
+    switch(settings->game_mode) {
+	case PLACEMENT_MODE:
+	    place_ship(field,
+		       ship/*ship*/,
+		       &field[cursor->x][cursor->y],
+		       cursor->direction);
+	    break;
+	case BATTLE_MODE:
+	    /*attack_ship(создать функцию атаки корабля);*/
+	    break;
+	default:
+	    break;
+    }
+}
+
+./handler/handler.h:
+#ifndef HANDLER_H
+#define HANDLER_H
+
+#include "../../include/config.h"
+#include "../io/io.h"
+#include "../game/game.h"
+
+typedef void (*KeyHandler)(Cursor*);
+
+typedef struct {
+    char       mode;
+    int        key;
+    KeyHandler handler;
+} KeyBinding;
+
+extern KeyBinding bindings[];
+
+void handle_cases(int  	  key,
+		  Cursor* cursor,
+		  Ship*   ship, //временное решение
+		  Game*   settings);
+
+void enter_handler(Game*   settings,
+		   Ship*   ship, /*ship в составе структуры надо сделать*/
+		   Cursor* cursor);
+
+#endif
+
