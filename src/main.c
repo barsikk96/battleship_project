@@ -55,16 +55,18 @@ int main() {
             draw_field(field_box_y + 1, 
             	       field_box_x + 2, 
             	       settings.p1_field,
-		       SHOW_SHIPS, 
-            	       &cursor,
-		       PLAYER_FIELD);
+		       SHOW_SHIPS,  
+		       PLAYER_FIELD,
+		       &cursor,
+		       cruiser1);
                 
             draw_field(field_box_y + 1, 
             	       field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
             	       settings.p2_field, 
 		       HIDE_SHIPS, 
-            	       &cursor,
-		       ENEMY_FIELD);
+		       ENEMY_FIELD,
+		       &cursor,
+		       cruiser1);
 	}
 
 	// Поля для второго игрока
@@ -73,15 +75,17 @@ int main() {
             	       field_box_x + 2, 
             	       settings.p2_field,
 		       SHOW_SHIPS, 
-            	       &cursor,
-		       PLAYER_FIELD);
+            	       PLAYER_FIELD,
+		       &cursor,
+		       cruiser1); 
                 
             draw_field(field_box_y + 1, 
             	       field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
             	       settings.p1_field, 
 		       HIDE_SHIPS, 
-            	       &cursor,
-		       ENEMY_FIELD);
+		       ENEMY_FIELD,
+		       &cursor,
+		       cruiser1);
 	}
 	
 

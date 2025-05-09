@@ -19,11 +19,14 @@ void draw_border(int starty,
 void draw_field(int  	starty, 
 		int  	startx, 
 		Cell 	field[FIELD_SIZE][FIELD_SIZE], 
-		int  	is_own_field, 
+		int  	is_own_field, 	
+		int	current_field,
 		Cursor* cursor,
-		int	current_field) {
+		Ship*   active_ship) {
     for (int y = 0; y < FIELD_SIZE; y++) {
         for (int x = 0; x < FIELD_SIZE; x++) {
+	    int screen_y = starty + y;
+            int screen_x = startx + x * 2;
             char ch = '~'; // по умолчанию вода
             switch (field[y][x].status) {
                 case WATER: ch = '~'; break;
@@ -33,14 +36,37 @@ void draw_field(int  	starty,
                 case MISS:  ch = '^'; break;
             }
 
-            if (cursor->y == y && 
-		cursor->x == x && 
-		cursor->on_field == current_field) {
+            // Проверка: наводится ли курсор на это поле
+            int is_cursor_here = (cursor->x == x && cursor->y == y && cursor->on_field == current_field);
+
+            // Проверка: входит ли эта ячейка в зону предпросмотра корабля
+            int draw_preview = 0;
+            if (is_own_field && cursor->on_field == current_field && active_ship != NULL) {
+                for (int i = 0; i < active_ship->length; i++) {
+                    int px = cursor->x;
+                    int py = cursor->y;
+
+                    if (cursor->direction == VERT)
+                        py -= i;
+                    else
+                        px += i;
+
+                    if (px == x && py == y &&
+                        px >= 0 && px < FIELD_SIZE &&
+                        py >= 0 && py < FIELD_SIZE) {
+                        draw_preview = 1;
+                        break;
+                    }
+                }
+            }
+
+            // Отрисовка
+            if (is_cursor_here) {
                 attron(A_REVERSE);
-                mvprintw(starty + y, startx + x * CELL_WIDTH, "%c ", ch);
+                mvprintw(screen_y, screen_x, "%c", draw_preview ? '#' : ch);
                 attroff(A_REVERSE);
             } else {
-                mvprintw(starty + y, startx + x * CELL_WIDTH, "%c ", ch);
+                mvprintw(screen_y, screen_x, "%c", draw_preview ? '#' : ch);
             }
         }
     }
