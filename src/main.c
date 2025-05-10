@@ -10,10 +10,6 @@ int main() {
     keypad(stdscr, TRUE);
     cbreak();
 
-    int screen_height, 
-	screen_width;
-    getmaxyx(stdscr, screen_height, screen_width);
-
     // Позиции и размеры
     int field_box_y = 1, 
 	field_box_x = 2;

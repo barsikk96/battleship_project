@@ -136,7 +136,6 @@ int attack_ship(Game* settings,
 		      def_cell->ship);
 	else
 	    def_cell->status = HIT;
-	flag_error = SUCCESS;
     }
 
     return flag_error;
