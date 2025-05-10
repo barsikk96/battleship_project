@@ -42,8 +42,8 @@ int main() {
 	            &cursor,
 	            &settings);
 	
-	mode_handler(&settings,
-		     &cursor);
+	stage_handler(&settings,
+		      &cursor);
     }
 
     game_over(&settings);

@@ -116,10 +116,13 @@ void game_over(Game* settings) {
     settings->count_p2_ships = 0;
 }
 
-void attack_ship(Game* settings,
-		 Cell* def_cell) {
-    if(def_cell->status == WATER)
+int attack_ship(Game* settings,
+		Cell* def_cell) {
+    int flag_error = ERR_RE_ATTACK;
+    if(def_cell->status == WATER) {
 	def_cell->status = MISS;
+    	flag_error = SUCCESS;
+    }
     
     if(def_cell->status == SHIP) {
 	def_cell->ship->hp--;
@@ -128,7 +131,10 @@ void attack_ship(Game* settings,
 		      def_cell->ship);
 	else
 	    def_cell->status = HIT;
+	flag_error = SUCCESS;
     }
+
+    return flag_error;
 }
 
 void kill_ship(Game* settings,

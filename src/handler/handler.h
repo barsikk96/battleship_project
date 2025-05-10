@@ -22,7 +22,7 @@ void key_handler(int  	 key,
 void enter_handler(Game*   settings, 
 		   Cursor* cursor);
 
-void mode_handler(Game*   settings,
-		  Cursor* cursor);
+void stage_handler(Game*   settings,
+		   Cursor* cursor);
 
 #endif

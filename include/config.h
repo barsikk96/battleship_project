@@ -37,7 +37,8 @@ enum {
     SUCCESS 	   = 0,
     ERR_ALLOCATION = 1,
     ERR_NO_SPACE   = 2,
-    ERR_OCC_CELL   = 3
+    ERR_OCC_CELL   = 3,
+    ERR_RE_ATTACK  = 4
 };
 
 #endif

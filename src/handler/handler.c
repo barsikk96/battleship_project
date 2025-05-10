@@ -53,7 +53,7 @@ void enter_handler(Game*    settings,
 		       	   		ship,
 		           		&field[cursor->y][cursor->x],
 		           		cursor->direction);
-		if (result == SUCCESS) {
+		if(result == SUCCESS) {
     		    ship->is_placed = true;
     		    if (settings->game_screen == PLAYER1_SCREEN) {
         		settings->count_p1_ships++;
@@ -69,20 +69,22 @@ void enter_handler(Game*    settings,
     	    else
 		field = settings->p1_field;
 	    
-	    attack_ship(settings,
-			&field[cursor->y][cursor->x]);
-	    settings->game_screen = 
-		    (settings->game_screen == PLAYER1_SCREEN) 
-		    ? PLAYER2_SCREEN 
-		    : PLAYER1_SCREEN;
+	    int result = attack_ship(settings,
+			             &field[cursor->y][cursor->x]);
+	    if(result == SUCCESS) {
+	    	settings->game_screen = 
+			(settings->game_screen == PLAYER1_SCREEN) 
+		    	? PLAYER2_SCREEN 
+		    	: PLAYER1_SCREEN;
+	    }
 	    break;
 	default:
 	    break;
     }
 }
 
-void mode_handler(Game*   settings,
-		  Cursor* cursor) {
+void stage_handler(Game*   settings,
+		   Cursor* cursor) {
     // Переключение на следующий корабль после размещения
     Ship** ships = (settings->game_screen == PLAYER1_SCREEN) ? 
 	            settings->p1_ships : 

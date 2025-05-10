@@ -39,8 +39,8 @@ void init_game(Game* settings);
 
 void game_over(Game* settings);
 
-void attack_ship(Game* settings,
-		 Cell* def_cell);
+int attack_ship(Game* settings,
+		Cell* def_cell);
 
 void kill_ship(Game* settings,
 	       Ship* ship);
