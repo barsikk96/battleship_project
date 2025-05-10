@@ -16,13 +16,13 @@ void draw_border(int starty,
 		 int height, 
 		 int width);
 
-void draw_field(int  	starty, 
-		int  	startx,  
-		Cell 	field[FIELD_SIZE][FIELD_SIZE], 
-		int  	is_own_field, 	
-		int     current_field,
-		Cursor* cursor,
-		Ship*   active_ship);
+void draw_field(int 	starty, 
+                int 	startx, 
+                int 	is_own_field,     
+                int     current_field,
+                Cell**  field,
+                Cursor* cursor,
+                Ship*   active_ship);
 
 void draw_buttons(int  starty, 
 		  char mode);
@@ -38,5 +38,13 @@ void mv_right_cursor(Cursor* cursor);
 void mv_field_cursor(Cursor* cursor);
 
 void choose_ship_dir(Cursor* cursor);
+
+void render_ui(int     starty, 
+	       int     startx, 
+	       int     height, 
+	       int     width,
+	       Game*   settings,
+	       Cursor* cursor,
+	       size_t  active_ship);
 
 #endif

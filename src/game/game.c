@@ -1,22 +1,125 @@
 #include "game.h"
 
-void init_field(Cell field[FIELD_SIZE][FIELD_SIZE]) {
+void init_field(Cell** field) {
     for(unsigned char init_row = 0; init_row < 10; init_row++)
 	for(unsigned char init_col = 0; 
 			  init_col < 10; 
 			  init_col++) {
 	    field[init_row][init_col].row     = init_row;
 	    field[init_row][init_col].col     = init_col;
-	    field[init_row][init_col].checked = 0;
 	    field[init_row][init_col].ship    = NULL;
 	    field[init_row][init_col].status  = WATER;
 	}
 }
 
-void place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
-	        Ship* ship, 
-	        Cell* def_cell,
-	        int   direction) {
+Ship* create_ship(int type_ship) {
+    int flag_error = SUCCESS;
+
+    Ship* ship = malloc(sizeof(Ship));
+    if(!ship) {
+	flag_error = ERR_ALLOCATION;
+	log_err(flag_error);
+    }
+
+    if(!flag_error) {
+	switch(type_ship) {
+	    case BATTLESHIP:
+		ship->length = 4;
+		ship->hp     = 4;
+		break;
+	    case CRUISER:
+		ship->length = 3;
+		ship->hp     = 3;
+		break;
+	    case DESTROYER:
+		ship->length = 2;
+		ship->hp     = 2;
+		break;
+	    case BOAT:
+		ship->length = 1;
+		ship->hp     = 1;
+		break;
+	}
+    }
+
+    return ship;
+}
+
+void init_game(Game* settings) {
+    settings->p1_field = malloc(FIELD_SIZE * sizeof(Cell*));
+    for (int i = 0; i < FIELD_SIZE; i++)
+    	settings->p1_field[i] = malloc(FIELD_SIZE * sizeof(Cell));
+    init_field(settings->p1_field);
+
+    settings->p2_field = malloc(FIELD_SIZE * sizeof(Cell*));
+    for (int i = 0; i < FIELD_SIZE; i++)
+    	settings->p2_field[i] = malloc(FIELD_SIZE * sizeof(Cell));
+    init_field(settings->p2_field);
+
+    settings->count_p1_ships  = 0;  
+    settings->p1_ships = malloc(COUNT_SHIPS * sizeof(Ship*));
+    
+    settings->count_p2_ships  = 0;
+    settings->p2_ships = malloc(COUNT_SHIPS * sizeof(Ship*));
+
+    size_t count     = 0;
+    int ship_types[] = { BATTLESHIP, 
+	    		 CRUISER, CRUISER, 
+			 DESTROYER, DESTROYER, DESTROYER, 
+			 BOAT, BOAT, BOAT, BOAT };
+    for (int i = 0; i < COUNT_SHIPS; i++) {
+    	settings->p1_ships[i] = create_ship(ship_types[i]);
+    	settings->p2_ships[i] = create_ship(ship_types[i]);
+    	settings->p1_ships[i]->is_placed = false;
+    	settings->p2_ships[i]->is_placed = false;
+    }
+
+    settings->game_mode   = PLACEMENT_MODE;
+    settings->game_screen = PLAYER1_SCREEN;
+}
+
+void game_over(Game* settings) {
+    if(settings->p1_field) {
+	free(settings->p1_field);
+	settings->p1_field = NULL;
+    }
+    if(settings->p2_field) {
+        free(settings->p2_field);
+        settings->p2_field = NULL;
+    }
+
+    // Освобождаем корабли игрока 1
+    if (settings->p1_ships) {
+        for (unsigned char i = 0; i < settings->count_p1_ships; i++) {
+            if (settings->p1_ships[i]) {
+                free(settings->p1_ships[i]);
+		settings->p1_ships[i] = NULL;
+            }
+        }
+        free(settings->p1_ships); 
+        settings->p1_ships = NULL;
+    }
+
+    // Освобождаем корабли игрока 2 
+    if (settings->p2_ships) {
+        for (unsigned char i = 0; i < settings->count_p2_ships; i++) {
+            if (settings->p2_ships[i]) {
+                free(settings->p2_ships[i]);  
+                settings->p2_ships[i] = NULL;
+            }
+        }
+        free(settings->p2_ships);  
+        settings->p2_ships = NULL;
+    }
+
+    settings->count_p1_ships = 0;
+    settings->count_p2_ships = 0;
+}
+
+int place_ship(Cell** field,
+	        Ship*  ship, 
+	        Cell*  def_cell,
+	        int    direction) {
     int flag_error = SUCCESS;
     
     switch(direction) {
@@ -24,23 +127,27 @@ void place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
 	    flag_error = filling_cells_vert(field, 
 			    	 	    ship, 
 					    def_cell);
+	    ship->is_placed = true;
 	    log_err(flag_error);
 	    break;
 	case HOR:
 	    flag_error = filling_cells_hor(field, 
 			      		   ship, 
 			      	 	   def_cell);
+	    ship->is_placed = true;
 	    log_err(flag_error);
 	    break;
 	default:
 	    break;
     }
+
+    return flag_error;
 }
 
-int is_free_space(Cell  field[FIELD_SIZE][FIELD_SIZE],
-		  Ship* def_ship,
-		  Cell* def_cell,
-		  int   direction) {
+int is_free_space(Cell** field,
+		  Ship*  def_ship,
+		  Cell*  def_cell,
+		  int    direction) {
     int flag_error = SUCCESS;
 
     unsigned char count_len = def_ship->length;
@@ -77,9 +184,9 @@ int is_free_space(Cell  field[FIELD_SIZE][FIELD_SIZE],
     return flag_error;
 }
 
-int filling_cells_vert(Cell  field[FIELD_SIZE][FIELD_SIZE],
-		       Ship* def_ship,
-		       Cell* def_cell) {
+int filling_cells_vert(Cell** field,
+		       Ship*  def_ship,
+		       Cell*  def_cell) {
     int flag_error = SUCCESS;
 
     
@@ -100,9 +207,9 @@ int filling_cells_vert(Cell  field[FIELD_SIZE][FIELD_SIZE],
     return flag_error;
 }
 
-int filling_cells_hor(Cell  field[FIELD_SIZE][FIELD_SIZE],
-		      Ship* def_ship,
-		      Cell* def_cell) {
+int filling_cells_hor(Cell** field,
+		      Ship*  def_ship,
+		      Cell*  def_cell) {
     int flag_error = SUCCESS;
 
     unsigned char count_len = def_ship->length;

@@ -15,14 +15,14 @@ KeyBinding bindings[] = {
 
 void handle_cases(int     key,
 		  Cursor* cursor,
-		  Ship*   ship, // временное решение
+		  size_t  ship, 
 		  Game*   settings) {
     char break_flag = 0;
     int  bindings_size = sizeof(bindings) / sizeof(bindings[0]); 
     
     if(key == KEY_ENTER || key == '\n') {
 	enter_handler(settings,
-		      ship, /*ship надо передать в составе структуры*/
+		      ship,
 		      cursor);
 	break_flag = 1;
     }
@@ -36,21 +36,38 @@ void handle_cases(int     key,
 	}
 }
 
-void enter_handler(Game*   settings,
-		   Ship*   ship, /*ship в составе структуры надо сделать*/
-		   Cursor* cursor) {
-    Cell (*field)[FIELD_SIZE];
-    if(settings->game_screen == PLAYER1_SCREEN)
+void enter_handler(Game*    settings,
+		   size_t   num_ship, 
+		   Cursor*  cursor) {
+    Cell** field;
+    Ship*  ship;
+    if(settings->game_screen == PLAYER1_SCREEN) {
 	field = settings->p1_field;
-    else
+	ship  = settings->p1_ships[num_ship];
+    } else {
 	field = settings->p2_field;
+	ship  = settings->p2_ships[num_ship];
+    }
 
     switch(settings->game_mode) {
 	case PLACEMENT_MODE:
-	    place_ship(field,
-		       ship/*ship*/,
-		       &field[cursor->y][cursor->x],
-		       cursor->direction);
+	    if ((settings->game_screen == PLAYER1_SCREEN && 
+         	num_ship >= settings->count_p1_ships) ||
+        	(settings->game_screen == PLAYER2_SCREEN && 
+         	num_ship >= settings->count_p2_ships)) {
+	        int result = place_ship(field,
+		       	   		ship,
+		           		&field[cursor->y][cursor->x],
+		           		cursor->direction);
+		if (result == SUCCESS) {
+    		    ship->is_placed = true;
+    		    if (settings->game_screen == PLAYER1_SCREEN) {
+        		settings->count_p1_ships++;
+    		    } else {
+        		settings->count_p2_ships++;
+    		    }
+		}
+	    }
 	    break;
 	case BATTLE_MODE:
 	    /*attack_ship(создать функцию атаки корабля);*/

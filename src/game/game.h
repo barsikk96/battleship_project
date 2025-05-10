@@ -6,42 +6,52 @@
 typedef struct {
     unsigned char length;
     unsigned char hp;
+    bool 	  is_placed;
 } Ship;
 
 typedef struct {
     Ship* 	  ship;
     unsigned char row;
     unsigned char col;
-    unsigned char checked;
     	     char status;
 } Cell;
 
 typedef struct {
-    Cell (*p1_field)[FIELD_SIZE];
-    Cell (*p2_field)[FIELD_SIZE];
-    char  game_mode;
-    char  game_screen;
+    Cell**        p1_field;
+    Cell**	  p2_field;
+    Ship** 		p1_ships;
+    unsigned char count_p1_ships;
+    Ship** 		p2_ships;
+    unsigned char count_p2_ships;
+    char   	  game_mode;
+    char  	  game_screen;
 } Game;
 
-void init_field(Cell field[FIELD_SIZE][FIELD_SIZE]);
+void init_field(Cell** field);
 
-void place_ship(Cell  field[FIELD_SIZE][FIELD_SIZE],
-	        Ship* ship, 
-	        Cell* def_cell,
-	        int   direction);
+Ship* create_ship(int type_ship);
 
-int is_free_space(Cell  field[FIELD_SIZE][FIELD_SIZE],
-		  Ship* def_ship,
-		  Cell* def_cell,
-		  int   direction);
+void init_game(Game* settings);
 
-int filling_cells_vert(Cell  field[FIELD_SIZE][FIELD_SIZE],
-		       Ship* def_ship,
-		       Cell* def_cell);
+void game_over(Game* settings);
 
-int filling_cells_hor(Cell  field[FIELD_SIZE][FIELD_SIZE],
-		      Ship* def_ship,
-		      Cell* def_cell);
+int place_ship(Cell** field,
+	        Ship*  ship, 
+	        Cell*  def_cell,
+	        int    direction);
+
+int is_free_space(Cell** field,
+		  Ship*  def_ship,
+		  Cell*  def_cell,
+		  int    direction);
+
+int filling_cells_vert(Cell** field,
+		       Ship*  def_ship,
+		       Cell*  def_cell);
+
+int filling_cells_hor(Cell** field,
+		      Ship*  def_ship,
+		      Cell*  def_cell);
 
 void log_err(int flag_error);
 

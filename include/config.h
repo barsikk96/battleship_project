@@ -9,6 +9,7 @@
 
 #define FIELD_SIZE 10
 #define CELL_WIDTH 2
+#define COUNT_SHIPS 10
 
 #define PLAYER_FIELD 1
 #define ENEMY_FIELD 0
@@ -26,6 +27,9 @@
 #define HOR 2
 
 enum CellState { WATER, SHIP, HIT, KILL, MISS };
+
+// Типы кораблей
+enum { BATTLESHIP, CRUISER, DESTROYER, BOAT };
 
 // Коды ошибок
 enum {

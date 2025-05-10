@@ -17,11 +17,11 @@ extern KeyBinding bindings[];
 
 void handle_cases(int  	  key,
 		  Cursor* cursor,
-		  Ship*   ship, //временное решение
+		  size_t  ship, //временное решение
 		  Game*   settings);
 
 void enter_handler(Game*   settings,
-		   Ship*   ship, /*ship в составе структуры надо сделать*/
+		   size_t  ship, /*ship в составе структуры надо сделать*/
 		   Cursor* cursor);
 
 #endif

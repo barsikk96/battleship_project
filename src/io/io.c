@@ -16,18 +16,18 @@ void draw_border(int starty,
     mvaddch(starty + height - 1, startx + width - 1, ACS_LRCORNER);
 }
 
-void draw_field(int  	starty, 
-		int  	startx, 
-		Cell 	field[FIELD_SIZE][FIELD_SIZE], 
-		int  	is_own_field, 	
-		int	current_field,
-		Cursor* cursor,
-		Ship*   active_ship) {
+void draw_field(int 	starty, 
+                int 	startx, 
+                int 	is_own_field,     
+                int 	current_field,
+                Cell** 	field,
+                Cursor* cursor,
+                Ship* 	active_ship) {     
     for (int y = 0; y < FIELD_SIZE; y++) {
         for (int x = 0; x < FIELD_SIZE; x++) {
-	    int screen_y = starty + y;
+            int screen_y = starty + y;
             int screen_x = startx + x * 2;
-            char ch = '~'; // по умолчанию вода
+            char ch = '~';
             switch (field[y][x].status) {
                 case WATER: ch = '~'; break;
                 case SHIP:  ch = is_own_field ? '#' : '~'; break;
@@ -36,31 +36,33 @@ void draw_field(int  	starty,
                 case MISS:  ch = '^'; break;
             }
 
-            // Проверка: наводится ли курсор на это поле
-            int is_cursor_here = (cursor->x == x && cursor->y == y && cursor->on_field == current_field);
+            int is_cursor_here = (cursor->x == x && 
+                                  cursor->y == y && 
+                                  cursor->on_field == current_field);
 
-            // Проверка: входит ли эта ячейка в зону предпросмотра корабля
             int draw_preview = 0;
-            if (is_own_field && cursor->on_field == current_field && active_ship != NULL) {
-                for (int i = 0; i < active_ship->length; i++) {
-                    int px = cursor->x;
-                    int py = cursor->y;
+            if (is_own_field && 
+                cursor->on_field == current_field && 
+                active_ship != NULL && 
+		!active_ship->is_placed) {
+                    for (int i = 0; i < active_ship->length; i++) {
+                        int px = cursor->x;
+                        int py = cursor->y;
 
-                    if (cursor->direction == VERT)
-                        py -= i;
-                    else
-                        px += i;
+                        if (cursor->direction == VERT)
+                            py -= i;
+                        else
+                            px += i;
 
-                    if (px == x && py == y &&
-                        px >= 0 && px < FIELD_SIZE &&
-                        py >= 0 && py < FIELD_SIZE) {
-                        draw_preview = 1;
-                        break;
+                        if (px == x && py == y &&
+                            px >= 0 && px < FIELD_SIZE &&
+                            py >= 0 && py < FIELD_SIZE) {
+                            draw_preview = 1;
+                            break;
+                        }
                     }
-                }
             }
 
-            // Отрисовка
             if (is_cursor_here) {
                 attron(A_REVERSE);
                 mvprintw(screen_y, screen_x, "%c", draw_preview ? '#' : ch);
@@ -116,4 +118,61 @@ void choose_ship_dir(Cursor* cursor) {
     cursor->direction = (cursor->direction == VERT) 
 	      				    ?
 	    				HOR : VERT;
+}
+
+void render_ui(int     starty, 
+	       int     startx, 
+	       int     height, 
+	       int     width,
+	       Game*   settings,
+	       Cursor* cursor,
+	       size_t  active_ship) {
+        // Нарисовать рамку
+        draw_border(starty, 
+		    startx, 
+		    height, 
+		    width);
+
+	// Поля для первого игрока
+        if(settings->game_screen == PLAYER1_SCREEN) {
+            draw_field(starty + 1, 
+            	       startx + 2,  
+		       SHOW_SHIPS,  
+		       PLAYER_FIELD,
+		       settings->p1_field,
+		       cursor,
+		       settings->p1_ships[active_ship]);
+                
+            draw_field(starty + 1, 
+            	       startx + FIELD_SIZE * CELL_WIDTH + 4, 
+		       HIDE_SHIPS, 
+		       ENEMY_FIELD,
+		       settings->p2_field,	
+		       cursor,
+		       settings->p2_ships[active_ship]);
+	}
+
+	// Поля для второго игрока
+        if(settings->game_screen == PLAYER2_SCREEN) {
+            draw_field(starty + 1, 
+            	       startx + 2, 
+		       SHOW_SHIPS, 
+            	       PLAYER_FIELD, 
+            	       settings->p2_field,
+		       cursor,
+		       settings->p2_ships[active_ship]); 
+                
+            draw_field(starty + 1, 
+            	       startx + FIELD_SIZE * CELL_WIDTH + 4, 
+		       HIDE_SHIPS, 
+		       ENEMY_FIELD,
+            	       settings->p1_field, 
+		       cursor,
+		       settings->p1_ships[active_ship]);
+	}
+	
+
+        // Кнопки
+        draw_buttons(starty + height + 1, 
+		     settings->game_mode);
 }

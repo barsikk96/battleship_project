@@ -18,93 +18,45 @@ int main() {
     int field_box_y = 1, 
 	field_box_x = 2;
     int field_box_height = FIELD_SIZE + 2;
-    int field_box_width  = FIELD_SIZE * CELL_WIDTH * 2 + 6; // 2 поля + пробел
+    int field_box_width  = FIELD_SIZE * CELL_WIDTH * 2 + 6; 
 
-    Cell player1_field[FIELD_SIZE][FIELD_SIZE];
-    init_field(player1_field);
-
-    Cell player2_field[FIELD_SIZE][FIELD_SIZE];
-    init_field(player2_field);
-
-    Game settings = { player1_field,
-    		      player2_field,
-    		      PLACEMENT_MODE,
-    		      PLAYER1_SCREEN };
+    Game settings;
+    init_game(&settings);
 
     Cursor cursor = { 0, 9, PLAYER_FIELD, VERT };
 
-    Ship* cruiser1   = malloc(sizeof(Ship));
-    cruiser1->length = 4;
-    cruiser1->hp     = 4;
-
-    Ship* cruiser2   = malloc(sizeof(Ship));
-    cruiser2->length = 4;
-    cruiser2->hp     = 4;
-
+    size_t active_ship = 0;
     while (1) {
-        clear();
-
-        // Нарисовать рамку
-        draw_border(field_box_y, 
-		    field_box_x, 
-		    field_box_height, 
-		    field_box_width);
-
-	// Поля для первого игрока
-        if(settings.game_screen == PLAYER1_SCREEN) {
-            draw_field(field_box_y + 1, 
-            	       field_box_x + 2, 
-            	       settings.p1_field,
-		       SHOW_SHIPS,  
-		       PLAYER_FIELD,
-		       &cursor,
-		       cruiser1);
-                
-            draw_field(field_box_y + 1, 
-            	       field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
-            	       settings.p2_field, 
-		       HIDE_SHIPS, 
-		       ENEMY_FIELD,
-		       &cursor,
-		       cruiser1);
-	}
-
-	// Поля для второго игрока
-        if(settings.game_screen == PLAYER2_SCREEN) {
-            draw_field(field_box_y + 1, 
-            	       field_box_x + 2, 
-            	       settings.p2_field,
-		       SHOW_SHIPS, 
-            	       PLAYER_FIELD,
-		       &cursor,
-		       cruiser1); 
-                
-            draw_field(field_box_y + 1, 
-            	       field_box_x + FIELD_SIZE * CELL_WIDTH + 4, 
-            	       settings.p1_field, 
-		       HIDE_SHIPS, 
-		       ENEMY_FIELD,
-		       &cursor,
-		       cruiser1);
-	}
+	clear();
 	
+	render_ui(field_box_y,
+	          field_box_x,
+	          field_box_height,
+	          field_box_width,
+	          &settings,
+	          &cursor,
+	          active_ship);
 
-        // Кнопки
-        draw_buttons(field_box_y + field_box_height + 1, 
-		     settings.game_mode);
+	refresh();
 
-        refresh();
-
-        // Управление
-        int key = getch();
-        handle_cases(key,
-		     &cursor,
-		     cruiser1,
-		     &settings); 
+	int key = getch();
+	handle_cases(key,
+	             &cursor,
+	             active_ship,
+	             &settings);
+	
+	// Переключение на следующий корабль после размещения
+	if (settings.game_mode == PLACEMENT_MODE && 
+    	    settings.p1_ships[active_ship]->is_placed) {
+    	    active_ship++;
+    	    if (active_ship >= COUNT_SHIPS) {
+            	settings.game_mode = BATTLE_MODE;
+	        active_ship 	   = 0;
+	    }
+	}	
     }
 
-    free(cruiser1);
-    free(cruiser2);
+    game_over(&settings);
 
     endwin();
 
