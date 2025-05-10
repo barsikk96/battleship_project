@@ -3,13 +3,16 @@
 
 #include "../include/config.h"
 
+typedef struct Cell Cell;
+
 typedef struct {
+    Cell* 	  address[4];
     unsigned char length;
     unsigned char hp;
     bool 	  is_placed;
 } Ship;
 
-typedef struct {
+typedef struct Cell {
     Ship* 	  ship;
     unsigned char row;
     unsigned char col;
@@ -35,6 +38,12 @@ Ship* create_ship(int type_ship);
 void init_game(Game* settings);
 
 void game_over(Game* settings);
+
+void attack_ship(Game* settings,
+		 Cell* def_cell);
+
+void kill_ship(Game* settings,
+	       Ship* ship);
 
 int place_ship(Cell** field,
 	        Ship*  ship, 

@@ -36,8 +36,6 @@ void mv_left_cursor(Cursor* cursor);
 
 void mv_right_cursor(Cursor* cursor);
 
-void mv_field_cursor(Cursor* cursor);
-
 void choose_ship_dir(Cursor* cursor);
 
 void render_ui(int     starty, 

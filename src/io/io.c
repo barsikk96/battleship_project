@@ -115,12 +115,6 @@ void mv_right_cursor(Cursor* cursor) {
 	(cursor->x)++;
 }
 
-void mv_field_cursor(Cursor* cursor) {
-    cursor->on_field = (cursor->on_field == PLAYER_FIELD) 
-	    				  ? 
-	    		      ENEMY_FIELD : PLAYER_FIELD;
-}
-
 void choose_ship_dir(Cursor* cursor) {
     cursor->direction = (cursor->direction == VERT) 
 	      				    ?

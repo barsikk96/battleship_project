@@ -116,10 +116,39 @@ void game_over(Game* settings) {
     settings->count_p2_ships = 0;
 }
 
+void attack_ship(Game* settings,
+		 Cell* def_cell) {
+    if(def_cell->status == WATER)
+	def_cell->status = MISS;
+    
+    if(def_cell->status == SHIP) {
+	def_cell->ship->hp--;
+	if(def_cell->ship->hp == 0)
+	    kill_ship(settings,
+		      def_cell->ship);
+	else
+	    def_cell->status = HIT;
+    }
+}
+
+void kill_ship(Game* settings,
+	       Ship* ship) {
+    for(size_t cell = 0; 
+	       cell < ship->length;
+	       cell++) {
+	ship->address[cell]->status = KILL;
+    }
+
+    if(settings->game_screen == PLAYER1_SCREEN)
+	settings->count_p1_ships--;
+    else
+	settings->count_p2_ships--;
+}
+
 int place_ship(Cell** field,
-	        Ship*  ship, 
-	        Cell*  def_cell,
-	        int    direction) {
+	       Ship*  ship, 
+	       Cell*  def_cell,
+	       int    direction) {
     int flag_error = SUCCESS;
     
     switch(direction) {
@@ -127,14 +156,12 @@ int place_ship(Cell** field,
 	    flag_error = filling_cells_vert(field, 
 			    	 	    ship, 
 					    def_cell);
-	    ship->is_placed = true;
 	    log_err(flag_error);
 	    break;
 	case HOR:
 	    flag_error = filling_cells_hor(field, 
 			      		   ship, 
 			      	 	   def_cell);
-	    ship->is_placed = true;
 	    log_err(flag_error);
 	    break;
 	default:
@@ -156,12 +183,12 @@ int is_free_space(Cell** field,
     	if(count_len <= 
            def_cell->row + 1) {
 	    for(int row = def_cell->row; 
-		count_len > 0;
+		count_len > 0 && !flag_error;
 		row--) {
 	        if(field[row][def_cell->col].ship)
 	    	    flag_error = ERR_OCC_CELL;
-	    	
-		count_len--;
+		else
+		    count_len--;
 	    }
 	} else
 	    flag_error = ERR_NO_SPACE;
@@ -170,12 +197,12 @@ int is_free_space(Cell** field,
 	if(count_len <= 
        	   10 - def_cell->col) {
 	    for(int col = def_cell->col; 
-		count_len > 0;
+		count_len > 0 && !flag_error;
 		col++) {
 	    	if(field[def_cell->row][col].ship)
 	    	    flag_error = ERR_OCC_CELL;
-		
-		count_len--;
+	        else	
+		    count_len--;
 	    }
 	} else
 	    flag_error = ERR_NO_SPACE;
@@ -199,8 +226,9 @@ int filling_cells_vert(Cell** field,
     for(int row = def_cell->row; 
 	    count_len > 0 && !flag_error; 
             row--) {
-	field[row][def_cell->col].ship   = def_ship;
+	field[row][def_cell->col].ship   = def_ship; 
 	field[row][def_cell->col].status = SHIP; 
+	def_ship->address[count_len - 1] = &field[row][def_cell->col];
 	count_len--;
     } 
 
@@ -223,6 +251,7 @@ int filling_cells_hor(Cell** field,
 	    col++) {
 	field[def_cell->row][col].ship   = def_ship;
 	field[def_cell->row][col].status = SHIP;
+	def_ship->address[count_len - 1] = &field[def_cell->row][col];
 	count_len--;
     } 
 

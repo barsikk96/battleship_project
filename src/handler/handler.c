@@ -9,8 +9,7 @@ KeyBinding bindings[] = {
     {BATTLE_MODE,    KEY_UP,    mv_up_cursor},
     {BATTLE_MODE,    KEY_DOWN,  mv_down_cursor},
     {BATTLE_MODE,    KEY_LEFT,  mv_left_cursor},
-    {BATTLE_MODE,    KEY_RIGHT, mv_right_cursor},
-    {BATTLE_MODE,    '\t',      mv_field_cursor}
+    {BATTLE_MODE,    KEY_RIGHT, mv_right_cursor}
 };
 
 void key_handler(int     key,
@@ -38,6 +37,7 @@ void enter_handler(Game*    settings,
 		   Cursor*  cursor) {
     Cell** field;
     Ship*  ship;
+   
     if(settings->game_screen == PLAYER1_SCREEN) {
 	field = settings->p1_field;
 	ship  = settings->p1_ships[settings->active_ship];
@@ -48,8 +48,8 @@ void enter_handler(Game*    settings,
 
     switch(settings->game_mode) {
 	case PLACEMENT_MODE:
-	    if (!ship->is_placed) {
-	        int result = place_ship(field,
+	    if (!ship->is_placed) {	        
+		int result = place_ship(field,
 		       	   		ship,
 		           		&field[cursor->y][cursor->x],
 		           		cursor->direction);
@@ -64,14 +64,25 @@ void enter_handler(Game*    settings,
 	    }
 	    break;
 	case BATTLE_MODE:
-	    /*attack_ship(создать функцию атаки корабля);*/
+	    if(settings->game_screen == PLAYER1_SCREEN)
+		field = settings->p2_field;
+    	    else
+		field = settings->p1_field;
+	    
+	    attack_ship(settings,
+			&field[cursor->y][cursor->x]);
+	    settings->game_screen = 
+		    (settings->game_screen == PLAYER1_SCREEN) 
+		    ? PLAYER2_SCREEN 
+		    : PLAYER1_SCREEN;
 	    break;
 	default:
 	    break;
     }
 }
 
-void mode_handler(Game* settings) {
+void mode_handler(Game*   settings,
+		  Cursor* cursor) {
     // Переключение на следующий корабль после размещения
     Ship** ships = (settings->game_screen == PLAYER1_SCREEN) ? 
 	            settings->p1_ships : 
@@ -87,6 +98,10 @@ void mode_handler(Game* settings) {
 	else {
 	    settings->game_screen = PLAYER1_SCREEN;
 	    settings->game_mode   = BATTLE_MODE;
+
+	    cursor->on_field = ENEMY_FIELD;
+            cursor->x = 0;
+            cursor->y = 0;
 	}
 	settings->active_ship = 0;
     } 
