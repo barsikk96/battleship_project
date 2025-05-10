@@ -25,7 +25,6 @@ int main() {
 
     Cursor cursor = { 0, 9, PLAYER_FIELD, VERT };
 
-    size_t active_ship = 0;
     while (1) {
 	clear();
 	
@@ -34,26 +33,16 @@ int main() {
 	          field_box_height,
 	          field_box_width,
 	          &settings,
-	          &cursor,
-	          active_ship);
+	          &cursor);
 
 	refresh();
 
 	int key = getch();
-	handle_cases(key,
-	             &cursor,
-	             active_ship,
-	             &settings);
+	key_handler(key,
+	            &cursor,
+	            &settings);
 	
-	// Переключение на следующий корабль после размещения
-	if (settings.game_mode == PLACEMENT_MODE && 
-    	    settings.p1_ships[active_ship]->is_placed) {
-    	    active_ship++;
-    	    if (active_ship >= COUNT_SHIPS) {
-            	settings.game_mode = BATTLE_MODE;
-	        active_ship 	   = 0;
-	    }
-	}	
+	mode_handler(&settings);
     }
 
     game_over(&settings);

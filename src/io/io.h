@@ -11,10 +11,11 @@ typedef struct {
     int direction;
 } Cursor;
 
-void draw_border(int starty, 
-		 int startx, 
-		 int height, 
-		 int width);
+void draw_border(int   starty, 
+		 int   startx, 
+		 int   height, 
+		 int   width,
+	   const char* label);
 
 void draw_field(int 	starty, 
                 int 	startx, 
@@ -44,7 +45,6 @@ void render_ui(int     starty,
 	       int     height, 
 	       int     width,
 	       Game*   settings,
-	       Cursor* cursor,
-	       size_t  active_ship);
+	       Cursor* cursor);
 
 #endif

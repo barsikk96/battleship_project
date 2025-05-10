@@ -25,6 +25,7 @@ typedef struct {
     unsigned char count_p2_ships;
     char   	  game_mode;
     char  	  game_screen;
+    unsigned char active_ship;
 } Game;
 
 void init_field(Cell** field);

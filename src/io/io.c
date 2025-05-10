@@ -1,9 +1,10 @@
 #include "io.h"
 
-void draw_border(int starty, 
-		 int startx, 
-		 int height, 
-		 int width) {
+void draw_border(int   starty, 
+		 int   startx, 
+		 int   height, 
+		 int   width,
+	   const char* label) {
     mvaddch(starty, startx,             ACS_ULCORNER);
     mvhline(starty, startx + 1,         ACS_HLINE, width - 2);
     mvaddch(starty, startx + width - 1, ACS_URCORNER);
@@ -14,6 +15,12 @@ void draw_border(int starty,
     mvaddch(starty + height - 1, startx,             ACS_LLCORNER);
     mvhline(starty + height - 1, startx + 1,         ACS_HLINE, width - 2);
     mvaddch(starty + height - 1, startx + width - 1, ACS_LRCORNER);
+
+    if (label != NULL) {
+        int label_length = strlen(label);
+        int label_x = startx + (width - label_length) / 2;
+        mvprintw(starty - 1, label_x, "%s", label);
+    }
 }
 
 void draw_field(int 	starty, 
@@ -125,23 +132,25 @@ void render_ui(int     starty,
 	       int     height, 
 	       int     width,
 	       Game*   settings,
-	       Cursor* cursor,
-	       size_t  active_ship) {
-        // Нарисовать рамку
-        draw_border(starty, 
-		    startx, 
-		    height, 
-		    width);
+	       Cursor* cursor) {
+        
 
 	// Поля для первого игрока
         if(settings->game_screen == PLAYER1_SCREEN) {
-            draw_field(starty + 1, 
+            // Нарисовать рамку
+            draw_border(starty, 
+		    	startx, 
+		    	height, 
+		    	width,
+			"Игрок 1");
+
+	    draw_field(starty + 1, 
             	       startx + 2,  
 		       SHOW_SHIPS,  
 		       PLAYER_FIELD,
 		       settings->p1_field,
 		       cursor,
-		       settings->p1_ships[active_ship]);
+		       settings->p1_ships[settings->active_ship]);
                 
             draw_field(starty + 1, 
             	       startx + FIELD_SIZE * CELL_WIDTH + 4, 
@@ -149,18 +158,25 @@ void render_ui(int     starty,
 		       ENEMY_FIELD,
 		       settings->p2_field,	
 		       cursor,
-		       settings->p2_ships[active_ship]);
+		       settings->p2_ships[settings->active_ship]);
 	}
 
 	// Поля для второго игрока
         if(settings->game_screen == PLAYER2_SCREEN) {
-            draw_field(starty + 1, 
+            // Нарисовать рамку
+            draw_border(starty, 
+		    	startx, 
+		    	height, 
+		    	width,
+			"Игрок 2");
+
+	    draw_field(starty + 1, 
             	       startx + 2, 
 		       SHOW_SHIPS, 
             	       PLAYER_FIELD, 
             	       settings->p2_field,
 		       cursor,
-		       settings->p2_ships[active_ship]); 
+		       settings->p2_ships[settings->active_ship]); 
                 
             draw_field(starty + 1, 
             	       startx + FIELD_SIZE * CELL_WIDTH + 4, 
@@ -168,7 +184,7 @@ void render_ui(int     starty,
 		       ENEMY_FIELD,
             	       settings->p1_field, 
 		       cursor,
-		       settings->p1_ships[active_ship]);
+		       settings->p1_ships[settings->active_ship]);
 	}
 	
 

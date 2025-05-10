@@ -62,18 +62,18 @@ void init_game(Game* settings) {
     settings->count_p2_ships  = 0;
     settings->p2_ships = malloc(COUNT_SHIPS * sizeof(Ship*));
 
-    size_t count     = 0;
     int ship_types[] = { BATTLESHIP, 
 	    		 CRUISER, CRUISER, 
 			 DESTROYER, DESTROYER, DESTROYER, 
 			 BOAT, BOAT, BOAT, BOAT };
-    for (int i = 0; i < COUNT_SHIPS; i++) {
-    	settings->p1_ships[i] = create_ship(ship_types[i]);
-    	settings->p2_ships[i] = create_ship(ship_types[i]);
-    	settings->p1_ships[i]->is_placed = false;
-    	settings->p2_ships[i]->is_placed = false;
+    for (int ship = 0; ship < COUNT_SHIPS; ship++) {
+    	settings->p1_ships[ship] = create_ship(ship_types[ship]);
+    	settings->p2_ships[ship] = create_ship(ship_types[ship]);
+    	settings->p1_ships[ship]->is_placed = false;
+    	settings->p2_ships[ship]->is_placed = false;
     }
 
+    settings->active_ship = 0;
     settings->game_mode   = PLACEMENT_MODE;
     settings->game_screen = PLAYER1_SCREEN;
 }

@@ -13,16 +13,14 @@ KeyBinding bindings[] = {
     {BATTLE_MODE,    '\t',      mv_field_cursor}
 };
 
-void handle_cases(int     key,
-		  Cursor* cursor,
-		  size_t  ship, 
-		  Game*   settings) {
+void key_handler(int     key,
+		 Cursor* cursor, 
+		 Game*   settings) {
     char break_flag = 0;
     int  bindings_size = sizeof(bindings) / sizeof(bindings[0]); 
     
     if(key == KEY_ENTER || key == '\n') {
 	enter_handler(settings,
-		      ship,
 		      cursor);
 	break_flag = 1;
     }
@@ -36,25 +34,21 @@ void handle_cases(int     key,
 	}
 }
 
-void enter_handler(Game*    settings,
-		   size_t   num_ship, 
+void enter_handler(Game*    settings, 
 		   Cursor*  cursor) {
     Cell** field;
     Ship*  ship;
     if(settings->game_screen == PLAYER1_SCREEN) {
 	field = settings->p1_field;
-	ship  = settings->p1_ships[num_ship];
+	ship  = settings->p1_ships[settings->active_ship];
     } else {
 	field = settings->p2_field;
-	ship  = settings->p2_ships[num_ship];
+	ship  = settings->p2_ships[settings->active_ship];
     }
 
     switch(settings->game_mode) {
 	case PLACEMENT_MODE:
-	    if ((settings->game_screen == PLAYER1_SCREEN && 
-         	num_ship >= settings->count_p1_ships) ||
-        	(settings->game_screen == PLAYER2_SCREEN && 
-         	num_ship >= settings->count_p2_ships)) {
+	    if (!ship->is_placed) {
 	        int result = place_ship(field,
 		       	   		ship,
 		           		&field[cursor->y][cursor->x],
@@ -75,4 +69,25 @@ void enter_handler(Game*    settings,
 	default:
 	    break;
     }
+}
+
+void mode_handler(Game* settings) {
+    // Переключение на следующий корабль после размещения
+    Ship** ships = (settings->game_screen == PLAYER1_SCREEN) ? 
+	            settings->p1_ships : 
+		    settings->p2_ships;
+
+    if(settings->game_mode == PLACEMENT_MODE && 
+    	ships[settings->active_ship]->is_placed)
+	settings->active_ship++;
+    
+    if(settings->active_ship >= COUNT_SHIPS) {
+        if(settings->game_screen == PLAYER1_SCREEN)
+	   settings->game_screen = PLAYER2_SCREEN;
+	else {
+	    settings->game_screen = PLAYER1_SCREEN;
+	    settings->game_mode   = BATTLE_MODE;
+	}
+	settings->active_ship = 0;
+    } 
 }

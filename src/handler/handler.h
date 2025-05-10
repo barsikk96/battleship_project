@@ -15,13 +15,13 @@ typedef struct {
 
 extern KeyBinding bindings[];
 
-void handle_cases(int  	  key,
-		  Cursor* cursor,
-		  size_t  ship, //временное решение
-		  Game*   settings);
+void key_handler(int  	 key,
+		 Cursor* cursor, 
+		 Game*   settings);
 
-void enter_handler(Game*   settings,
-		   size_t  ship, /*ship в составе структуры надо сделать*/
+void enter_handler(Game*   settings, 
 		   Cursor* cursor);
+
+void mode_handler(Game* settings);
 
 #endif
