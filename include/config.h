@@ -20,9 +20,12 @@
 
 #define PLACEMENT_MODE 1
 #define BATTLE_MODE 2
+#define GAME_OVER 3
 
 #define PLAYER1_SCREEN 1
 #define PLAYER2_SCREEN 2
+#define TRANSITION_SCREEN 3
+#define WINNER_SCREEN 4
 
 #define VERT 1
 #define HOR 2

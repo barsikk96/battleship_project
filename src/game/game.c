@@ -80,29 +80,34 @@ void init_game(Game* settings) {
 
 void game_over(Game* settings) {
     if(settings->p1_field) {
-	free(settings->p1_field);
-	settings->p1_field = NULL;
+        for (int i = 0; i < FIELD_SIZE; i++) {
+            free(settings->p1_field[i]); 
+        }
+        free(settings->p1_field); 
+        settings->p1_field = NULL;
     }
+    
     if(settings->p2_field) {
-        free(settings->p2_field);
+        for (int i = 0; i < FIELD_SIZE; i++) {
+            free(settings->p2_field[i]); 
+        }
+        free(settings->p2_field); 
         settings->p2_field = NULL;
     }
 
-    // Освобождаем корабли игрока 1
     if (settings->p1_ships) {
-        for (unsigned char i = 0; i < settings->count_p1_ships; i++) {
+        for (unsigned char i = 0; i < COUNT_SHIPS; i++) { 
             if (settings->p1_ships[i]) {
                 free(settings->p1_ships[i]);
-		settings->p1_ships[i] = NULL;
+                settings->p1_ships[i] = NULL;
             }
         }
         free(settings->p1_ships); 
         settings->p1_ships = NULL;
     }
-
-    // Освобождаем корабли игрока 2 
+ 
     if (settings->p2_ships) {
-        for (unsigned char i = 0; i < settings->count_p2_ships; i++) {
+        for (unsigned char i = 0; i < COUNT_SHIPS; i++) { 
             if (settings->p2_ships[i]) {
                 free(settings->p2_ships[i]);  
                 settings->p2_ships[i] = NULL;
@@ -146,9 +151,9 @@ void kill_ship(Game* settings,
     }
 
     if(settings->game_screen == PLAYER1_SCREEN)
-	settings->count_p1_ships--;
-    else
 	settings->count_p2_ships--;
+    else
+	settings->count_p1_ships--;
 }
 
 int place_ship(Cell** field,

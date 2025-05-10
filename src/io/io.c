@@ -95,6 +95,65 @@ void draw_buttons(int  starty,
     mvprintw(starty + 3, 2, "Ctrl+C — выход");
 }
 
+void draw_transition_screen(Game* settings) {
+    int width = 40;
+    int height = 5;
+    int screen_width, screen_height;
+    getmaxyx(stdscr, screen_height, screen_width); 
+
+    int center_y = screen_height / 2 - height / 2;
+    int center_x = screen_width / 2 - width / 2;
+
+    for (int y = center_y; y < center_y + height; y++) {
+        move(y, center_x);
+        clrtoeol(); 
+    }
+
+    draw_border(center_y, center_x, height, width, "Смена хода");
+
+    char* player_name = (settings->game_screen == PLAYER1_SCREEN) 
+                      ? "Игрок 1" 
+                      : "Игрок 2";
+
+    mvprintw(center_y + height / 2, 
+             center_x + (width - strlen(player_name) - 8) / 2,
+             "%s, ваш ход!", player_name);
+
+    mvprintw(center_y + height - 1, 
+             center_x + (width - 27) / 2,
+             "Нажмите Enter для продолжения");
+
+    refresh(); 
+}
+
+void draw_winner_screen(const char* winner_name) {
+    int width = 40;  
+    int height = 5;  
+    int screen_width, screen_height;
+    
+    getmaxyx(stdscr, screen_height, screen_width);
+    
+    int center_y = screen_height / 2 - height / 2;
+    int center_x = screen_width / 2 - width / 2;
+    
+    for (int y = center_y; y < center_y + height; y++) {
+        move(y, center_x);
+        clrtoeol();
+    }
+    
+    draw_border(center_y, center_x, height, width, "Игра окончена");
+    
+    mvprintw(center_y + height / 2, 
+             center_x + (width - strlen(winner_name) - 12) / 2,
+             "Победитель: %s!", winner_name);
+    
+    mvprintw(center_y + height - 1, 
+             center_x + (width - 27) / 2,
+             "Нажмите Enter для выхода");
+    
+    refresh();
+}
+
 void mv_up_cursor(Cursor* cursor) {
     if(cursor->y > 0)
 	(cursor->y)--;

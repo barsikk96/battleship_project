@@ -71,12 +71,20 @@ void enter_handler(Game*    settings,
 	    
 	    int result = attack_ship(settings,
 			             &field[cursor->y][cursor->x]);
-	    if(result == SUCCESS) {
-	    	settings->game_screen = 
+	    if(result == SUCCESS) {	
+		settings->game_screen = 
 			(settings->game_screen == PLAYER1_SCREEN) 
 		    	? PLAYER2_SCREEN 
 		    	: PLAYER1_SCREEN;
+
+		clear();
+		draw_transition_screen(settings);
+		refresh();
+		
+		while(getch() != '\n');
 	    }
+	    
+	    
 	    break;
 	default:
 	    break;
@@ -97,14 +105,41 @@ void stage_handler(Game*   settings,
     if(settings->active_ship >= COUNT_SHIPS) {
         if(settings->game_screen == PLAYER1_SCREEN)
 	   settings->game_screen = PLAYER2_SCREEN;
-	else {
+	else { 
 	    settings->game_screen = PLAYER1_SCREEN;
 	    settings->game_mode   = BATTLE_MODE;
+
+	    clear();
+	    draw_transition_screen(settings);
+	    refresh();
+	    
+	    while(getch() != '\n');
 
 	    cursor->on_field = ENEMY_FIELD;
             cursor->x = 0;
             cursor->y = 0;
 	}
 	settings->active_ship = 0;
-    } 
+    }
+
+    if (settings->game_mode == BATTLE_MODE) {
+        if (settings->count_p1_ships == 0) {
+            settings->game_mode = GAME_OVER;
+            
+	    clear();
+	    draw_winner_screen("Игрок 2");
+	    refresh();
+	    
+	    while(getch() != '\n');
+    	} 
+        else if (settings->count_p2_ships == 0) {
+            settings->game_mode = GAME_OVER;
+            
+	    clear();
+	    draw_winner_screen("Игрок 1");
+	    refresh();
+	    
+	    while(getch() != '\n');
+        }
+    }
 }

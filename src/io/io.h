@@ -28,6 +28,10 @@ void draw_field(int 	starty,
 void draw_buttons(int  starty, 
 		  char mode);
 
+void draw_transition_screen(Game* settings);
+
+void draw_winner_screen(const char* winner_name);
+
 void mv_up_cursor(Cursor* cursor);
 
 void mv_down_cursor(Cursor* cursor);

@@ -25,7 +25,7 @@ int main() {
 
     Cursor cursor = { 0, 9, PLAYER_FIELD, VERT };
 
-    while (1) {
+    while (settings.game_mode != GAME_OVER) {
 	clear();
 	
 	render_ui(field_box_y,
