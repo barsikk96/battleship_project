@@ -37,6 +37,10 @@ Ship* create_ship(int type_ship);
 
 void init_game(Game* settings);
 
+void free_field(Cell** field);
+
+void free_ships(Ship** ships);
+
 void game_over(Game* settings);
 
 int attack_ship(Game* settings,
@@ -46,9 +50,9 @@ void kill_ship(Game* settings,
 	       Ship* ship);
 
 int place_ship(Cell** field,
-	        Ship*  ship, 
-	        Cell*  def_cell,
-	        int    direction);
+	       Ship*  ship, 
+	       Cell*  def_cell,
+	       int    direction);
 
 int is_free_space(Cell** field,
 		  Ship*  def_ship,

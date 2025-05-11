@@ -12,6 +12,11 @@
 #define CELL_WIDTH 2
 #define COUNT_SHIPS 10
 
+#define FIELD_BOX_Y 1
+#define FIELD_BOX_X 2
+#define FIELD_BOX_HEIGHT (FIELD_SIZE + 2)
+#define FIELD_BOX_WIDTH (FIELD_SIZE * CELL_WIDTH * 2 + 6)
+
 #define PLAYER_FIELD 1
 #define ENEMY_FIELD 0
 

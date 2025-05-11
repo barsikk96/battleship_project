@@ -9,12 +9,13 @@ int main() {
     curs_set(FALSE);
     keypad(stdscr, TRUE);
     cbreak();
-
-    // Позиции и размеры
-    int field_box_y = 1, 
-	field_box_x = 2;
-    int field_box_height = FIELD_SIZE + 2;
-    int field_box_width  = FIELD_SIZE * CELL_WIDTH * 2 + 6; 
+    start_color();
+    
+    init_pair(1, COLOR_BLUE, COLOR_BLACK);    // Вода
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);   // Корабль
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);  // Попадание
+    init_pair(4, COLOR_RED, COLOR_BLACK);     // Уничтожен
+    init_pair(5, COLOR_WHITE, COLOR_BLACK);   // Промах
 
     Game settings;
     init_game(&settings);
@@ -22,16 +23,8 @@ int main() {
     Cursor cursor = { 0, 9, PLAYER_FIELD, VERT };
 
     while (settings.game_mode != GAME_OVER) {
-	clear();
-	
-	render_ui(field_box_y,
-	          field_box_x,
-	          field_box_height,
-	          field_box_width,
-	          &settings,
-	          &cursor);
-
-	refresh();
+	redraw_screen(&settings,
+		      &cursor);
 
 	int key = getch();
 	key_handler(key,

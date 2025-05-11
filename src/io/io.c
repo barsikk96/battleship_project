@@ -18,7 +18,7 @@ void draw_border(int   starty,
 
     if (label != NULL) {
         int label_length = strlen(label);
-        int label_x = startx + (width - label_length) / 2;
+        int label_x 	 = startx + (width - label_length) / 2;
         mvprintw(starty - 1, label_x, "%s", label);
     }
 }
@@ -26,21 +26,38 @@ void draw_border(int   starty,
 void draw_field(int 	starty, 
                 int 	startx, 
                 int 	is_own_field,     
-                int 	current_field,
-                Cell** 	field,
+                int     current_field,
+                Cell**  field,
                 Cursor* cursor,
-                Ship* 	active_ship) {     
+                Ship*   active_ship) {     
     for (int y = 0; y < FIELD_SIZE; y++) {
         for (int x = 0; x < FIELD_SIZE; x++) {
-            int screen_y = starty + y;
-            int screen_x = startx + x * 2;
-            char ch = '~';
+            int  screen_y   = starty + y;
+            int  screen_x   = startx + x * 2;
+            char ch 	    = '~';
+            int  color_pair = 1; // По умолчанию цвет воды
+
             switch (field[y][x].status) {
-                case WATER: ch = '~'; break;
-                case SHIP:  ch = is_own_field ? '#' : '~'; break;
-                case HIT:   ch = '*'; break;
-                case KILL:  ch = 'x'; break;
-                case MISS:  ch = '^'; break;
+                case WATER: 
+                    ch 	       = '~';
+                    color_pair = 1; // Синий
+                    break;
+                case SHIP:  
+                    ch 	       = is_own_field ? '#' : '~';
+                    color_pair = is_own_field ? 2 : 1; // Зеленый или синий
+                    break;
+                case HIT:   
+                    ch 	       = '*';
+                    color_pair = 3; // Желтый
+                    break;
+                case KILL:  
+                    ch 	       = 'x';
+                    color_pair = 4; // Красный
+                    break;
+                case MISS:  
+                    ch 	       = '^';
+                    color_pair = 5; // Белый
+                    break;
             }
 
             int is_cursor_here = (cursor->x == x && 
@@ -51,7 +68,7 @@ void draw_field(int 	starty,
             if (is_own_field && 
                 cursor->on_field == current_field && 
                 active_ship != NULL && 
-		!active_ship->is_placed) {
+                !active_ship->is_placed) {
                     for (int i = 0; i < active_ship->length; i++) {
                         int px = cursor->x;
                         int py = cursor->y;
@@ -65,17 +82,24 @@ void draw_field(int 	starty,
                             px >= 0 && px < FIELD_SIZE &&
                             py >= 0 && py < FIELD_SIZE) {
                             draw_preview = 1;
+                            color_pair   = 2; // Зеленый для превью корабля
                             break;
                         }
                     }
             }
 
             if (is_cursor_here) {
-                attron(A_REVERSE);
-                mvprintw(screen_y, screen_x, "%c", draw_preview ? '#' : ch);
-                attroff(A_REVERSE);
+                attron(A_REVERSE | COLOR_PAIR(color_pair));
+                mvaddch(screen_y, 
+			screen_x, 
+			draw_preview ? '#' : ch);
+                attroff(A_REVERSE | COLOR_PAIR(color_pair));
             } else {
-                mvprintw(screen_y, screen_x, "%c", draw_preview ? '#' : ch);
+                attron(COLOR_PAIR(color_pair));
+                mvaddch(screen_y, 
+			screen_x, 
+			draw_preview ? '#' : ch);
+                attroff(COLOR_PAIR(color_pair));
             }
         }
     }
@@ -89,16 +113,17 @@ void draw_buttons(int  starty,
     if(mode == BATTLE_MODE)
 	mode_name = "Сражение";
 
-    mvprintw(starty, 2, "[Режим: %s]", mode_name);
+    mvprintw(starty, 	 2, "[Режим: %s]", mode_name);
     mvprintw(starty + 1, 2, "Стрелки — перемещение");
     mvprintw(starty + 2, 2, "Enter — действие / установка");
     mvprintw(starty + 3, 2, "Ctrl+C — выход");
 }
 
 void draw_transition_screen(Game* settings) {
-    int width = 40;
+    int width  = 40;
     int height = 5;
-    int screen_width, screen_height;
+    int screen_width, 
+	screen_height;
     getmaxyx(stdscr, screen_height, screen_width); 
 
     int center_y = screen_height / 2 - height / 2;
@@ -109,11 +134,13 @@ void draw_transition_screen(Game* settings) {
         clrtoeol(); 
     }
 
-    draw_border(center_y, center_x, height, width, "Смена хода");
+    draw_border(center_y, center_x, 
+		height,   width, 
+		"Смена хода");
 
     char* player_name = (settings->game_screen == PLAYER1_SCREEN) 
-                      ? "Игрок 1" 
-                      : "Игрок 2";
+                        ? "Игрок 1" 
+                        : "Игрок 2";
 
     mvprintw(center_y + height / 2, 
              center_x + (width - strlen(player_name) - 8) / 2,
@@ -141,7 +168,9 @@ void draw_winner_screen(const char* winner_name) {
         clrtoeol();
     }
     
-    draw_border(center_y, center_x, height, width, "Игра окончена");
+    draw_border(center_y, center_x, 
+		height,   width, 
+		"Игра окончена");
     
     mvprintw(center_y + height / 2, 
              center_x + (width - strlen(winner_name) - 12) / 2,
@@ -176,8 +205,8 @@ void mv_right_cursor(Cursor* cursor) {
 
 void choose_ship_dir(Cursor* cursor) {
     cursor->direction = (cursor->direction == VERT) 
-	      				    ?
-	    				HOR : VERT;
+	      		? HOR 
+			: VERT;
 }
 
 void render_ui(int     starty, 
@@ -188,27 +217,19 @@ void render_ui(int     starty,
 	       Cursor* cursor) {
         
 
-	// Поля для первого игрока
         if(settings->game_screen == PLAYER1_SCREEN) {
-            // Нарисовать рамку
-            draw_border(starty, 
-		    	startx, 
-		    	height, 
-		    	width,
+            draw_border(starty, startx, 
+		    	height, width,
 			"Игрок 1");
 
-	    draw_field(starty + 1, 
-            	       startx + 2,  
-		       SHOW_SHIPS,  
-		       PLAYER_FIELD,
+	    draw_field(starty + 1, startx + 2,  
+		       SHOW_SHIPS, PLAYER_FIELD,
 		       settings->p1_field,
 		       cursor,
 		       settings->p1_ships[settings->active_ship]);
                 
-            draw_field(starty + 1, 
-            	       startx + FIELD_SIZE * CELL_WIDTH + 4, 
-		       HIDE_SHIPS, 
-		       ENEMY_FIELD,
+            draw_field(starty + 1, startx + FIELD_SIZE * CELL_WIDTH + 4, 
+		       HIDE_SHIPS, ENEMY_FIELD,
 		       settings->p2_field,	
 		       cursor,
 		       settings->p2_ships[settings->active_ship]);
@@ -217,24 +238,18 @@ void render_ui(int     starty,
 	// Поля для второго игрока
         if(settings->game_screen == PLAYER2_SCREEN) {
             // Нарисовать рамку
-            draw_border(starty, 
-		    	startx, 
-		    	height, 
-		    	width,
+            draw_border(starty, startx, 
+		    	height, width,
 			"Игрок 2");
 
-	    draw_field(starty + 1, 
-            	       startx + 2, 
-		       SHOW_SHIPS, 
-            	       PLAYER_FIELD, 
+	    draw_field(starty + 1, startx + 2, 
+		       SHOW_SHIPS, PLAYER_FIELD, 
             	       settings->p2_field,
 		       cursor,
 		       settings->p2_ships[settings->active_ship]); 
                 
-            draw_field(starty + 1, 
-            	       startx + FIELD_SIZE * CELL_WIDTH + 4, 
-		       HIDE_SHIPS, 
-		       ENEMY_FIELD,
+            draw_field(starty + 1, startx + FIELD_SIZE * CELL_WIDTH + 4, 
+		       HIDE_SHIPS, ENEMY_FIELD,
             	       settings->p1_field, 
 		       cursor,
 		       settings->p1_ships[settings->active_ship]);
@@ -244,4 +259,13 @@ void render_ui(int     starty,
         // Кнопки
         draw_buttons(starty + height + 1, 
 		     settings->game_mode);
+}
+
+void redraw_screen(Game*   settings, 
+		   Cursor* cursor) {
+    werase(stdscr);
+    render_ui(FIELD_BOX_Y,      FIELD_BOX_X, 
+              FIELD_BOX_HEIGHT, FIELD_BOX_WIDTH,
+              settings, cursor);
+    doupdate();
 }

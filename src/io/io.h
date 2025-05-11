@@ -49,4 +49,7 @@ void render_ui(int     starty,
 	       Game*   settings,
 	       Cursor* cursor);
 
+void redraw_screen(Game*   settings, 
+		   Cursor* cursor);
+
 #endif

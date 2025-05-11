@@ -48,14 +48,14 @@ void enter_handler(Game*    settings,
 
     switch(settings->game_mode) {
 	case PLACEMENT_MODE:
-	    if (!ship->is_placed) {	        
+	    if(!ship->is_placed) {	        
 		int result = place_ship(field,
 		       	   		ship,
 		           		&field[cursor->y][cursor->x],
 		           		cursor->direction);
 		if(result == SUCCESS) {
     		    ship->is_placed = true;
-    		    if (settings->game_screen == PLAYER1_SCREEN) {
+    		    if(settings->game_screen == PLAYER1_SCREEN) {
         		settings->count_p1_ships++;
     		    } else {
         		settings->count_p2_ships++;
@@ -77,9 +77,9 @@ void enter_handler(Game*    settings,
 		    	? PLAYER2_SCREEN 
 		    	: PLAYER1_SCREEN;
 
-		clear();
+		werase(stdscr);
 		draw_transition_screen(settings);
-		refresh();
+		doupdate();
 		
 		while(getch() != '\n');
 	    }
@@ -93,10 +93,9 @@ void enter_handler(Game*    settings,
 
 void stage_handler(Game*   settings,
 		   Cursor* cursor) {
-    // Переключение на следующий корабль после размещения
-    Ship** ships = (settings->game_screen == PLAYER1_SCREEN) ? 
-	            settings->p1_ships : 
-		    settings->p2_ships;
+    Ship** ships = (settings->game_screen == PLAYER1_SCREEN) 
+	    	   ? settings->p1_ships 
+		   : settings->p2_ships;
 
     if(settings->game_mode == PLACEMENT_MODE && 
     	ships[settings->active_ship]->is_placed)
@@ -109,15 +108,15 @@ void stage_handler(Game*   settings,
 	    settings->game_screen = PLAYER1_SCREEN;
 	    settings->game_mode   = BATTLE_MODE;
 
-	    clear();
+	    werase(stdscr);
 	    draw_transition_screen(settings);
-	    refresh();
+	    doupdate();
 	    
 	    while(getch() != '\n');
 
 	    cursor->on_field = ENEMY_FIELD;
-            cursor->x = 0;
-            cursor->y = 0;
+            cursor->x 	     = 0;
+            cursor->y 	     = 0;
 	}
 	settings->active_ship = 0;
     }
@@ -126,18 +125,18 @@ void stage_handler(Game*   settings,
         if (settings->count_p1_ships == 0) {
             settings->game_mode = GAME_OVER;
             
-	    clear();
+	    werase(stdscr);
 	    draw_winner_screen("Игрок 2");
-	    refresh();
+	    doupdate();
 	    
 	    while(getch() != '\n');
     	} 
         else if (settings->count_p2_ships == 0) {
             settings->game_mode = GAME_OVER;
             
-	    clear();
+	    werase(stdscr);
 	    draw_winner_screen("Игрок 1");
-	    refresh();
+	    doupdate();
 	    
 	    while(getch() != '\n');
         }
