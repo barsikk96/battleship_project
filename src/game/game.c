@@ -187,14 +187,33 @@ int is_free_space(Cell** field,
 		  int    direction) {
     int flag_error = SUCCESS;
 
+    int row = def_cell->row;
+    int col = def_cell->col;
+
+    for (int r = row - 1; 
+	     r <= row + 1 && !flag_error; 
+	     r++) {
+        for (int c = col - 1; 
+		 c <= col + 1 && !flag_error; 
+		 c++) {
+            if (r >= 0 && 
+		r < FIELD_SIZE && 
+		c >= 0 && 
+		c < FIELD_SIZE) {
+                if (field[r][c].ship != NULL && 
+		    !(r == row && c == col)) {
+                    flag_error = ERR_OCC_CELL;
+                }
+            }
+        }
+    }
+
     unsigned char count_len = def_ship->length;
-    
     if(direction == VERT) {
     	if(count_len <= 
            def_cell->row + 1) {
-	    for(int row = def_cell->row; 
-		count_len > 0 && !flag_error;
-		row--) {
+	    for(; count_len > 0 && !flag_error;
+		  row--) {
 	        if(field[row][def_cell->col].ship)
 	    	    flag_error = ERR_OCC_CELL;
 		else
@@ -206,9 +225,8 @@ int is_free_space(Cell** field,
     if(direction == HOR) {
 	if(count_len <= 
        	   10 - def_cell->col) {
-	    for(int col = def_cell->col; 
-		count_len > 0 && !flag_error;
-		col++) {
+	    for(; count_len > 0 && !flag_error;
+		  col++) {
 	    	if(field[def_cell->row][col].ship)
 	    	    flag_error = ERR_OCC_CELL;
 	        else	
